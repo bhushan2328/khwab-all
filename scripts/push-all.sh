@@ -1,44 +1,47 @@
-#!/bin/bash
+#!/data/data/com.termux/files/usr/bin/bash
+
 set -e
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$HOME/khwab-all"
 
 if [ -z "$GITHUB_PAT" ]; then
     echo "ERROR: GITHUB_PAT is not set."
-    echo "Run:"
-    echo 'export GITHUB_PAT="your_personal_access_token"'
+    echo "Run: source ~/.bashrc"
     exit 1
 fi
 
-echo "========================================="
-echo "PUSHING ALL KHWAB REPOSITORIES"
-echo "========================================="
+push_repo() {
+    local REPO="$1"
 
-for repo in khwab khwab-core khwab-integration
-do
-    echo ""
-    echo ">>> $repo"
+    echo
+    echo "========================================"
+    echo "Pushing $REPO"
+    echo "========================================"
 
-    cd "$ROOT/$repo"
+    cd "$ROOT/$REPO"
 
     BRANCH=$(git branch --show-current)
 
-    if [ -n "$(git status --porcelain)" ]; then
-        echo "Repository '$repo' has uncommitted changes."
-        echo "Please commit them first."
+    if [ -z "$BRANCH" ]; then
+        echo "ERROR: Detached HEAD in $REPO"
         exit 1
     fi
 
     URL=$(git remote get-url origin)
-    URL=${URL#https://github.com/}
+    URL=${URL#https://}
 
-    git -c credential.helper= push \
-    "https://bhushan2328:${GITHUB_PAT}@github.com/${URL}" \
-    HEAD:"$BRANCH"
-done
+    git push "https://bhushan2328:${GITHUB_PAT}@${URL}" "$BRANCH"
+}
 
-echo ""
-echo ">>> Updating khwab-all"
+# Push all repositories
+push_repo "khwab"
+push_repo "khwab-core"
+push_repo "khwab-integration"
+
+echo
+echo "========================================"
+echo "Updating khwab-all"
+echo "========================================"
 
 cd "$ROOT"
 
@@ -50,12 +53,17 @@ fi
 
 BRANCH=$(git branch --show-current)
 
-git -c credential.helper= push \
-"https://bhushan2328:${GITHUB_PAT}@github.com/bhushan2328/khwab-all.git" \
-HEAD:"$BRANCH"
+if [ -z "$BRANCH" ]; then
+    echo "ERROR: Detached HEAD in khwab-all"
+    exit 1
+fi
 
-echo ""
-echo "========================================="
-echo "SUCCESS!"
-echo "All repositories are synchronized."
-echo "========================================="
+URL=$(git remote get-url origin)
+URL=${URL#https://}
+
+git push "https://bhushan2328:${GITHUB_PAT}@${URL}" "$BRANCH"
+
+echo
+echo "========================================"
+echo "✓ All repositories pushed successfully!"
+echo "========================================"
