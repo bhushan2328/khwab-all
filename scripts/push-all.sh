@@ -34,7 +34,7 @@ do
 
     git -c credential.helper= push \
     "https://bhushan2328:${GITHUB_PAT}@github.com/${URL}" \
-    "$BRANCH"
+    HEAD:"$BRANCH"
 done
 
 echo ""
@@ -52,7 +52,7 @@ BRANCH=$(git branch --show-current)
 
 git -c credential.helper= push \
 "https://bhushan2328:${GITHUB_PAT}@github.com/bhushan2328/khwab-all.git" \
-"$BRANCH"
+HEAD:"$BRANCH"
 
 echo ""
 echo "========================================="
