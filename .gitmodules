@@ -1,0 +1,9 @@
+[submodule "khwab"]
+	path = khwab
+	url = https://github.com/bhushan2328/khwab.git
+[submodule "khwab-core"]
+	path = khwab-core
+	url = https://github.com/bhushan2328/khwab-core.git
+[submodule "khwab-integration"]
+	path = khwab-integration
+	url = https://github.com/bhushan2328/khwab-integration.git
