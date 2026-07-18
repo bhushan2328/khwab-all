@@ -1,23 +1,21 @@
-#!/data/data/com.termux/files/usr/bin/bash
-
+#!/bin/bash
 set -e
 
-REPOS=(
-  "khwab"
-  "khwab-core"
-  "khwab-integration"
-)
+echo "========================================"
+echo "Adding changes to all repositories"
+echo "========================================"
 
-for repo in "${REPOS[@]}"; do
-  echo "=================================="
-  echo "Adding changes: $repo"
-  echo "=================================="
+repos=("khwab" "khwab-core" "khwab-integration")
 
-  (
-    cd "$HOME/khwab-all/$repo"
-    git add .
-  )
+for repo in "${repos[@]}"; do
+    echo ""
+    echo ">>> $repo"
+    git -C "$repo" add .
 done
 
-echo
-echo "✓ All repositories staged successfully."
+echo ""
+echo ">>> khwab-all"
+git add .
+
+echo ""
+echo "✓ All changes staged successfully!"
