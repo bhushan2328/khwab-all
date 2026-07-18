@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
+
 set -e
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "========== Building khwab =========="
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+echo "========================================"
+echo "Building Khwab Workspace"
+echo "========================================"
+
 cd "$ROOT/khwab"
+
+chmod +x gradlew
+
 ./gradlew build
 
 echo ""
-echo "========== Building khwab-core =========="
-cd "$ROOT/khwab-core"
-./gradlew build
-
-echo ""
-echo "========== Building khwab-integration =========="
-cd "$ROOT/khwab-integration"
-./gradlew build
-
-echo ""
-echo "✅ All builds completed successfully."
+echo "========================================"
+echo "✅ Khwab workspace build completed successfully!"
+echo "========================================"
