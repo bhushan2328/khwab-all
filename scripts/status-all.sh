@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 echo "========== Repository Status =========="
 for repo in khwab khwab-core khwab-integration; do

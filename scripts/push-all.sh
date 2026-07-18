@@ -1,8 +1,8 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
-ROOT="$HOME/khwab-all"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 if [ -z "$GITHUB_PAT" ]; then
     echo "ERROR: GITHUB_PAT is not set."

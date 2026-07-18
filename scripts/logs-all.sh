@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 echo "========== Recent Commits =========="
 for repo in khwab khwab-core khwab-integration; do
