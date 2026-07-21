@@ -1,31 +1,44 @@
-$Root = Split-Path $PSScriptRoot -Parent
+. "$PSScriptRoot\common.ps1"
 
-Write-Host "========== KHWAB WORKSPACE STATUS ==========" -ForegroundColor Cyan
+Write-Title "KHWAB WORKSPACE STATUS"
 
-$repos = @(
-    @{ Name = "khwab-all"; Path = $Root },
-    @{ Name = "khwab"; Path = Join-Path $Root "khwab" },
-    @{ Name = "khwab-core"; Path = Join-Path $Root "khwab-core" },
-    @{ Name = "khwab-integration"; Path = Join-Path $Root "khwab-integration" }
-)
+foreach ($repo in Get-Repositories) {
 
-foreach ($repo in $repos) {
     Write-Host ""
-    Write-Host ">>> $($repo.Name)" -ForegroundColor Yellow
+    Write-Host "Repository : $($repo.Name)" -ForegroundColor Yellow
+    Write-Host "Path       : $($repo.Path)"
 
-    if (Test-Path $repo.Path) {
-        Push-Location $repo.Path
+    if (!(Test-Path $repo.Path)) {
+        Write-ErrorMsg "Directory not found."
+        continue
+    }
 
-        if (Test-Path ".git") {
-            git status --short
-        }
-        else {
-            Write-Host "Not a Git repository."
-        }
+    Push-Location $repo.Path
 
+    if (!(Test-Path ".git")) {
+        Write-ErrorMsg "Not a Git repository."
         Pop-Location
+        continue
+    }
+
+    $branch = Get-CurrentBranch
+    $commit = git rev-parse --short HEAD
+    $status = git status --short
+
+    Write-Host "Branch     : $branch"
+    Write-Host "Commit     : $commit"
+
+    if ([string]::IsNullOrWhiteSpace($status)) {
+        Write-Success "Working tree clean"
     }
     else {
-        Write-Host "Directory not found: $($repo.Path)"
+        Write-Warning "Working tree has changes"
+        Write-Host ""
+        $status
     }
+
+    Pop-Location
 }
+
+Write-Host ""
+Write-Success "Status check complete."

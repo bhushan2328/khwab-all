@@ -1,53 +1,53 @@
-$Root = Split-Path $PSScriptRoot -Parent
+. "$PSScriptRoot\common.ps1"
+
+Write-Title "COMMIT CHANGES"
 
 $CommitMessage = Read-Host "Enter commit message"
 
 if ([string]::IsNullOrWhiteSpace($CommitMessage)) {
-    Write-Host "Commit cancelled."
-    exit
+    Write-Warning "Commit cancelled."
+    return
 }
 
-$repos = @(
-    @{ Name = "khwab-all"; Path = $Root },
-    @{ Name = "khwab"; Path = Join-Path $Root "khwab" },
-    @{ Name = "khwab-core"; Path = Join-Path $Root "khwab-core" },
-    @{ Name = "khwab-integration"; Path = Join-Path $Root "khwab-integration" }
-)
-
-Write-Host ""
-Write-Host "========== COMMITTING ==========" -ForegroundColor Cyan
-
-foreach ($repo in $repos) {
+foreach ($repo in Get-Repositories) {
 
     Write-Host ""
-    Write-Host ">>> $($repo.Name)" -ForegroundColor Yellow
+    Write-Host "Repository : $($repo.Name)" -ForegroundColor Yellow
 
     if (!(Test-Path $repo.Path)) {
-        Write-Host "Directory not found."
+        Write-ErrorMsg "Directory not found."
         continue
     }
 
     Push-Location $repo.Path
 
     if (!(Test-Path ".git")) {
-        Write-Host "Not a Git repository."
+        Write-ErrorMsg "Not a Git repository."
+        Pop-Location
+        continue
+    }
+
+    $status = git status --porcelain
+
+    if ([string]::IsNullOrWhiteSpace($status)) {
+        Write-Warning "Nothing to commit."
         Pop-Location
         continue
     }
 
     git add .
 
-    $status = git status --porcelain
+    git commit -m "$CommitMessage"
 
-    if ([string]::IsNullOrWhiteSpace($status)) {
-        Write-Host "No changes to commit."
+    if ($LASTEXITCODE -eq 0) {
+        Write-Success "Commit successful."
     }
     else {
-        git commit -m "$CommitMessage"
+        Write-ErrorMsg "Commit failed."
     }
 
     Pop-Location
 }
 
 Write-Host ""
-Write-Host "========== COMMIT COMPLETE ==========" -ForegroundColor Green
+Write-Success "Commit operation complete."

@@ -1,36 +1,43 @@
-$Root = Split-Path $PSScriptRoot -Parent
+. "$PSScriptRoot\common.ps1"
 
-Write-Host "========== ADDING CHANGES ==========" -ForegroundColor Cyan
+Write-Title "ADDING CHANGES"
 
-$repos = @(
-    @{ Name = "khwab-all"; Path = $Root },
-    @{ Name = "khwab"; Path = Join-Path $Root "khwab" },
-    @{ Name = "khwab-core"; Path = Join-Path $Root "khwab-core" },
-    @{ Name = "khwab-integration"; Path = Join-Path $Root "khwab-integration" }
-)
-
-foreach ($repo in $repos) {
+foreach ($repo in Get-Repositories) {
 
     Write-Host ""
-    Write-Host ">>> $($repo.Name)" -ForegroundColor Yellow
+    Write-Host "Repository : $($repo.Name)" -ForegroundColor Yellow
 
-    if (Test-Path $repo.Path) {
-        Push-Location $repo.Path
+    if (!(Test-Path $repo.Path)) {
+        Write-ErrorMsg "Directory not found."
+        continue
+    }
 
-        if (Test-Path ".git") {
-            git add .
-            Write-Host "Added changes."
-        }
-        else {
-            Write-Host "Not a Git repository."
-        }
+    Push-Location $repo.Path
 
+    if (!(Test-Path ".git")) {
+        Write-ErrorMsg "Not a Git repository."
         Pop-Location
+        continue
+    }
+
+    $status = git status --porcelain
+
+    if ([string]::IsNullOrWhiteSpace($status)) {
+        Write-Warning "Nothing to add."
     }
     else {
-        Write-Host "Directory not found: $($repo.Path)"
+        git add .
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "Changes added."
+        }
+        else {
+            Write-ErrorMsg "git add failed."
+        }
     }
+
+    Pop-Location
 }
 
 Write-Host ""
-Write-Host "========== DONE ==========" -ForegroundColor Green
+Write-Success "Add operation complete."
