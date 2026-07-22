@@ -1,45 +1,122 @@
-$Root = Split-Path $PSScriptRoot -Parent
+. "$PSScriptRoot\common.ps1"
 
-$repos = @(
-    @{ Name = "khwab-all"; Path = $Root },
-    @{ Name = "khwab"; Path = Join-Path $Root "khwab" },
-    @{ Name = "khwab-core"; Path = Join-Path $Root "khwab-core" },
-    @{ Name = "khwab-integration"; Path = Join-Path $Root "khwab-integration" }
-)
+Write-Title "PUSH WORKSPACE"
 
-Write-Host ""
-Write-Host "========== PUSHING REPOSITORIES ==========" -ForegroundColor Cyan
+$Success = @()
+$Skipped = @()
+$Failed = @()
 
-foreach ($repo in $repos) {
+foreach ($repo in Get-Repositories) {
 
     Write-Host ""
-    Write-Host ">>> $($repo.Name)" -ForegroundColor Yellow
+    Write-Host "==================================================" -ForegroundColor DarkGray
+    Write-Host "Repository : $($repo.Name)" -ForegroundColor Yellow
 
     if (!(Test-Path $repo.Path)) {
-        Write-Host "Directory not found."
+        Write-ErrorMsg "Directory not found."
+        $Failed += $repo.Name
         continue
     }
 
     Push-Location $repo.Path
 
-    if (!(Test-Path ".git")) {
-        Write-Host "Not a Git repository."
+    try {
+
+        if (!(Test-Path ".git")) {
+            Write-ErrorMsg "Not a Git repository."
+            $Failed += $repo.Name
+            continue
+        }
+
+        # Refresh remote information
+        git fetch origin --quiet 2>$null | Out-Null
+
+        # Safe branch detection
+        $branchOutput = git branch --show-current
+
+        if ($null -eq $branchOutput) {
+            $branch = ""
+        }
+        else {
+            $branch = ($branchOutput | Out-String).Trim()
+        }
+
+        # Detached HEAD
+        if ([string]::IsNullOrWhiteSpace($branch)) {
+
+            Write-Warning "Detached HEAD detected."
+
+            $remote = git for-each-ref `
+                --format="%(refname:short)" `
+                --contains HEAD `
+                refs/remotes/origin
+
+            if ($remote) {
+                $branch = ($remote | Select-Object -First 1).Replace("origin/","")
+                Write-Host "Resolved branch : $branch" -ForegroundColor Cyan
+            }
+            else {
+                Write-Warning "Unable to determine branch. Skipping."
+                $Skipped += $repo.Name
+                continue
+            }
+        }
+
+        Write-Host "Branch : $branch"
+
+        $status = git status -sb
+
+        if ($status -match "\[ahead") {
+
+            Write-Host "Status : Ahead of remote"
+
+            git push origin $branch
+
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "Push successful."
+                $Success += $repo.Name
+            }
+            else {
+                Write-ErrorMsg "Push failed."
+                $Failed += $repo.Name
+            }
+        }
+        else {
+
+            Write-Warning "Nothing to push."
+            $Skipped += $repo.Name
+        }
+    }
+    catch {
+
+        Write-ErrorMsg $_.Exception.Message
+        $Failed += $repo.Name
+    }
+    finally {
+
         Pop-Location
-        continue
     }
+}
 
-    $branch = git branch --show-current
+Write-Title "PUSH SUMMARY"
 
-    if ([string]::IsNullOrWhiteSpace($branch)) {
-        Write-Host "Unable to determine current branch."
-    }
-    else {
-        Write-Host "Pushing branch: $branch"
-        git push origin $branch
-    }
-
-    Pop-Location
+Write-Host ""
+Write-Host "Successful : $($Success.Count)" -ForegroundColor Green
+foreach ($r in $Success) {
+    Write-Host "  $r"
 }
 
 Write-Host ""
-Write-Host "========== PUSH COMPLETE ==========" -ForegroundColor Green
+Write-Host "Skipped : $($Skipped.Count)" -ForegroundColor Yellow
+foreach ($r in $Skipped) {
+    Write-Host "  $r"
+}
+
+Write-Host ""
+Write-Host "Failed : $($Failed.Count)" -ForegroundColor Red
+foreach ($r in $Failed) {
+    Write-Host "  $r"
+}
+
+Write-Host ""
+Write-Success "Workspace push complete."
