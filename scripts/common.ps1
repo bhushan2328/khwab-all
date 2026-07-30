@@ -3,10 +3,11 @@ function Get-Repositories {
     $Root = Split-Path $PSScriptRoot -Parent
 
     @(
-        @{ Name="khwab-all"; Path=$Root }
-        @{ Name="khwab"; Path=(Join-Path $Root "khwab") }
-        @{ Name="khwab-core"; Path=(Join-Path $Root "khwab-core") }
+        @{ Name="khwab-all";         Path=$Root }
+        @{ Name="khwab";             Path=(Join-Path $Root "khwab") }
+        @{ Name="khwab-core";        Path=(Join-Path $Root "khwab-core") }
         @{ Name="khwab-integration"; Path=(Join-Path $Root "khwab-integration") }
+        @{ Name="khwab-aura";        Path=(Join-Path $Root "khwab-aura") }
     )
 }
 
@@ -14,14 +15,14 @@ function Get-CurrentBranch {
 
     $branch = git symbolic-ref --short HEAD 2>$null
 
-    if([string]::IsNullOrWhiteSpace($branch)){
+    if ([string]::IsNullOrWhiteSpace($branch)) {
         return "(detached)"
     }
 
     return $branch.Trim()
 }
 
-function Write-Title($text){
+function Write-Title($text) {
 
     Write-Host ""
     Write-Host "==================================================" -ForegroundColor Cyan
@@ -29,14 +30,14 @@ function Write-Title($text){
     Write-Host "==================================================" -ForegroundColor Cyan
 }
 
-function Write-Success($text){
+function Write-Success($text) {
     Write-Host "[OK] $text" -ForegroundColor Green
 }
 
-function Write-Warning($text){
+function Write-Warning($text) {
     Write-Host "[WARN] $text" -ForegroundColor Yellow
 }
 
-function Write-ErrorMsg($text){
+function Write-ErrorMsg($text) {
     Write-Host "[ERROR] $text" -ForegroundColor Red
 }
