@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/khwab" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/khwab-aura" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/khwab-core" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/khwab-integration" vcs="Git" />
   </component>
