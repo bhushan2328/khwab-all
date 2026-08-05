@@ -5,17 +5,22 @@
     <option name="deviceSelectionList">
       <list>
         <PersistentDeviceSelectionData>
-          <option name="api" value="34" />
+          <option name="api" value="30" />
           <option name="brand" value="google" />
-          <option name="codename" value="akita" />
-          <option name="id" value="akita" />
+          <option name="codename" value="redfin" />
+          <option name="id" value="redfin" />
           <option name="labId" value="google" />
           <option name="manufacturer" value="Google" />
-          <option name="name" value="Pixel 8a" />
-          <option name="screenDensity" value="420" />
+          <option name="name" value="Pixel 5" />
+          <option name="screenDensity" value="440" />
           <option name="screenX" value="1080" />
-          <option name="screenY" value="2400" />
+          <option name="screenY" value="2340" />
           <option name="selected" value="true" />
+          <option name="tags">
+            <list>
+              <option value="default" />
+            </list>
+          </option>
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
           <option name="api" value="34" />
@@ -592,6 +597,18 @@
           <option name="screenDensity" value="450" />
           <option name="screenX" value="1080" />
           <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="akita" />
+          <option name="id" value="akita" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 8a" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
           <option name="api" value="35" />
@@ -2088,23 +2105,6 @@
           </option>
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
-          <option name="api" value="30" />
-          <option name="brand" value="google" />
-          <option name="codename" value="redfin" />
-          <option name="id" value="redfin" />
-          <option name="labId" value="google" />
-          <option name="manufacturer" value="Google" />
-          <option name="name" value="Pixel 5" />
-          <option name="screenDensity" value="440" />
-          <option name="screenX" value="1080" />
-          <option name="screenY" value="2340" />
-          <option name="tags">
-            <list>
-              <option value="default" />
-            </list>
-          </option>
-        </PersistentDeviceSelectionData>
-        <PersistentDeviceSelectionData>
           <option name="api" value="34" />
           <option name="brand" value="google" />
           <option name="codename" value="shiba" />
@@ -2436,6 +2436,6 @@
         </PersistentDeviceSelectionData>
       </list>
     </option>
-    <option name="selectedCloudProject" value="khwab-c0c3d" />
+    <option name="selectedCloudProject" value="project-9071611860900113365" />
   </component>
 </project>
