@@ -2,12 +2,14 @@ function Get-Repositories {
 
     $Root = Split-Path $PSScriptRoot -Parent
 
+    # khwab-all (the workspace root) must always be processed last so that
+    # sub-repositories are fully up-to-date before the parent is touched.
     @(
-        @{ Name="khwab-all";         Path=$Root }
         @{ Name="khwab";             Path=(Join-Path $Root "khwab") }
         @{ Name="khwab-core";        Path=(Join-Path $Root "khwab-core") }
         @{ Name="khwab-integration"; Path=(Join-Path $Root "khwab-integration") }
         @{ Name="khwab-aura";        Path=(Join-Path $Root "khwab-aura") }
+        @{ Name="khwab-all";         Path=$Root }
     )
 }
 
