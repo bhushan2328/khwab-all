@@ -1,0 +1,579 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Khwab Aura — Complete Phase Architecture Report</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.65;color:#1f2328;background:#fff;max-width:780px;margin:0 auto;padding:32px 22px 56px}
+  h1{font-size:24px;font-weight:800;margin-bottom:3px}
+  .lead{color:#57606a;font-size:13px;margin-bottom:30px;border-bottom:1px solid #e5e7eb;padding-bottom:16px}
+  h2{font-size:16px;font-weight:700;margin:34px 0 10px;color:#1f2328;border-bottom:2px solid #e5e7eb;padding-bottom:6px}
+  h3{font-size:13px;font-weight:700;margin:18px 0 5px;color:#3b82d4}
+  h4{font-size:12px;font-weight:700;margin:12px 0 3px;color:#7c5cd8;text-transform:uppercase;letter-spacing:.04em}
+  p{margin-bottom:8px}
+  ul,ol{margin:4px 0 10px 20px}
+  li{margin-bottom:3px}
+  code{font-family:"SF Mono","Consolas","Cascadia Code",monospace;font-size:11.5px;background:#f7f8fa;border:1px solid #e5e7eb;border-radius:3px;padding:1px 5px}
+  pre{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:5px;padding:11px 13px;font-size:11.5px;font-family:"SF Mono","Consolas",monospace;overflow-x:auto;margin:6px 0 12px;line-height:1.55}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0 14px}
+  th{background:#f7f8fa;text-align:left;padding:6px 9px;border:1px solid #e5e7eb;font-weight:700}
+  td{padding:5px 9px;border:1px solid #e5e7eb;vertical-align:top}
+  tr:nth-child(even) td{background:#fafbfc}
+  .badge{display:inline-block;border-radius:4px;padding:2px 8px;font-size:11.5px;font-weight:700;margin-right:5px;margin-bottom:4px}
+  .ok{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
+  .prot{background:#fff3cd;color:#856404;border:1px solid #ffeeba}
+  .note{background:#f0f4ff;border-left:3px solid #3b82d4;padding:8px 12px;margin:8px 0 12px;font-size:13px;color:#333}
+  .warn{background:#fff8f0;border-left:3px solid #e88040;padding:8px 12px;margin:8px 0 12px;font-size:13px;color:#5a3300}
+  .swatch{display:inline-block;width:13px;height:13px;border-radius:2px;border:1px solid rgba(0,0,0,.18);vertical-align:middle;margin-right:4px;flex-shrink:0}
+  .pal{display:flex;gap:2px;align-items:center;margin:2px 0}
+  .toc{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:5px;padding:14px 18px;margin-bottom:28px;font-size:12.5px}
+  .toc ul{margin:5px 0 0 14px}
+  .toc li{margin-bottom:1px}
+  .toc a{color:#3b82d4;text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  .phase-bar{display:flex;gap:4px;margin:8px 0 14px;flex-wrap:wrap}
+  .pb{border-radius:4px;padding:3px 9px;font-size:11.5px;font-weight:600;color:#fff}
+  .footer{border-top:1px solid #e5e7eb;margin-top:52px;padding-top:14px;text-align:center;font-size:12px;color:#57606a}
+  .col2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:520px){.col2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>Khwab Aura</h1>
+<p class="lead">Complete Phase Architecture Report  ·  All phases implemented  ·  Build: <strong>SUCCESSFUL</strong></p>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ul>
+    <li><a href="#arch">1. Repository &amp; Module Architecture</a></li>
+    <li><a href="#pipeline">2. Engine Pipeline</a></li>
+    <li><a href="#models">3. Core Data Models &amp; Enumerations</a></li>
+    <li><a href="#engines">4. Engine Layer</a></li>
+    <li><a href="#scene">5. Scene Composition &amp; Layer Order</a></li>
+    <li><a href="#phase-color">6. Phase Color — Atmospheric Color System</a></li>
+    <li><a href="#phase11">7. Phase 11 — Continuous Atmospheric Color Physics</a></li>
+    <li><a href="#layers">8. Rendering Layer Reference</a></li>
+    <li><a href="#protected">9. Protected Systems</a></li>
+    <li><a href="#build">10. Build Status</a></li>
+  </ul>
+</div>
+
+
+<h2 id="arch">1. Repository &amp; Module Architecture</h2>
+
+<table>
+  <tr><th>Repository</th><th>Role</th><th>Branch</th></tr>
+  <tr><td><code>khwab-all</code></td><td>Superrepo / Git submodule host</td><td>main</td></tr>
+  <tr><td><code>khwab-aura</code></td><td>Standalone Android library — the Aura visual system</td><td>main</td></tr>
+  <tr><td><code>khwab</code></td><td>Android application host</td><td>master</td></tr>
+  <tr><td><code>khwab-core</code></td><td>Platform-independent intelligence layer</td><td>main</td></tr>
+  <tr><td><code>khwab-integration</code></td><td>Communication boundary (core ↔ app)</td><td>main</td></tr>
+</table>
+
+<div class="note">Architecture rule: <code>khwab-core</code> must remain Android-free. The app communicates with core only through <code>khwab-integration</code>. Aura is an Android library consumed by the app.</div>
+
+<p>The Gradle settings file in <code>khwab/</code> wires all modules together:</p>
+<pre>include(":app")          // khwab/app
+include(":core")         // khwab-core/core
+include(":integration")  // khwab-integration/integration
+include(":aura")         // khwab-aura/aura</pre>
+
+
+<h2 id="pipeline">2. Engine Pipeline</h2>
+
+<pre>
+AuraConfig  (latitude, longitude, autoTime, autoWeather, stormIntensity, ...)
+    │
+    ▼
+AuraEngine.generateTheme(config)
+    ├── TimeState.now()                 (real device clock)
+    ├── SolarCalculator.calculate()     (GPS → sunriseHour, sunsetHour)
+    ├── TimePhaseEngine.calculate()     (time + solar → TimePhase enum)
+    ├── MoonPhaseCalculator.calculate() (Julian date → MoonStyle)
+    ├── SeasonEngine.calculate()        (latitude + month → Season)
+    ├── WeatherEngine.refresh()         (live weather → WeatherState)
+    ├── LightingEngine.update()         (time + weather → LightingState)
+    └── ThemeEngine.createTheme()       (all above → AuraTheme)
+                                                │
+                                                ▼
+                                           AuraTheme
+                                         (consumed by Compose UI)
+</pre>
+
+<p><strong>AuraTheme</strong> is the single contract between engine and UI. It carries:</p>
+<ul>
+  <li><code>timePhase: TimePhase</code> — categorical phase for non-sky systems</li>
+  <li><code>weatherState: WeatherState</code> — current weather</li>
+  <li><code>profile: ThemeProfile</code> — derived visual styles (sun, moon, clouds, animation…)</li>
+  <li><code>sunriseHour: Float?</code>, <code>sunsetHour: Float?</code> — GPS solar times (null if no location)</li>
+  <li><code>isSolarAccurate: Boolean</code> — true when GPS solar data is in use</li>
+  <li><code>lighting: LightingState</code> — authoritative intensity/ambient from LightingEngine</li>
+  <li><code>animationsEnabled: Boolean</code> — global animation gate</li>
+</ul>
+
+
+<h2 id="models">3. Core Data Models &amp; Enumerations</h2>
+
+<div class="col2">
+<div>
+<h4>TimePhase</h4>
+<ul>
+  <li>PRE_DAWN</li><li>SUNRISE</li><li>MORNING</li><li>NOON</li>
+  <li>AFTERNOON</li><li>SUNSET</li><li>EVENING</li><li>NIGHT</li><li>MIDNIGHT</li>
+</ul>
+<h4>WeatherState</h4>
+<ul><li>CLEAR</li><li>CLOUDY</li><li>RAIN</li><li>SNOW</li><li>FOG</li><li>STORM</li></ul>
+<h4>Season</h4>
+<ul><li>SPRING</li><li>SUMMER</li><li>AUTUMN</li><li>WINTER</li></ul>
+<h4>SkyStyle</h4>
+<ul><li>PRE_DAWN · DAWN · SUNRISE · MORNING · NOON · AFTERNOON · SUNSET · EVENING · NIGHT · MIDNIGHT · CLOUDY · FOG · STORM</li></ul>
+</div>
+<div>
+<h4>SunStyle</h4>
+<ul><li>DAWN · MORNING · NOON · AFTERNOON · SUNSET · HIDDEN</li></ul>
+<h4>MoonStyle</h4>
+<ul><li>HIDDEN · CRESCENT · HALF · GIBBOUS · FULL</li></ul>
+<h4>CloudStyle</h4>
+<ul><li>CLEAR · FEW · SCATTERED · BROKEN · OVERCAST · STORM</li></ul>
+<h4>AnimationStyle</h4>
+<ul><li>NONE · CALM · BREEZY · NORMAL · WINDY · RAIN · SNOW · STORM</li></ul>
+<h4>WeatherEffectStyle</h4>
+<ul><li>NONE · RAIN · SNOW · FOG · STORM</li></ul>
+<h4>AmbientLightStyle</h4>
+<ul><li>PRE_DAWN · SUNRISE · MORNING · NOON · AFTERNOON · SUNSET · EVENING · MOONLIGHT · NIGHT · OVERCAST · FOG</li></ul>
+</div>
+</div>
+
+<h3>ThemeEngine mappings (TimePhase → profile fields)</h3>
+<table>
+  <tr><th>TimePhase</th><th>SkyStyle</th><th>SunStyle</th><th>MoonStyle</th><th>AmbientLightStyle</th></tr>
+  <tr><td>PRE_DAWN</td><td>DAWN</td><td>HIDDEN</td><td>moonPhase</td><td>PRE_DAWN</td></tr>
+  <tr><td>SUNRISE</td><td>SUNRISE</td><td>DAWN</td><td>HIDDEN</td><td>SUNRISE</td></tr>
+  <tr><td>MORNING</td><td>MORNING</td><td>MORNING</td><td>HIDDEN</td><td>MORNING</td></tr>
+  <tr><td>NOON</td><td>NOON</td><td>NOON</td><td>HIDDEN</td><td>NOON</td></tr>
+  <tr><td>AFTERNOON</td><td>AFTERNOON</td><td>AFTERNOON</td><td>HIDDEN</td><td>AFTERNOON</td></tr>
+  <tr><td>SUNSET</td><td>SUNSET</td><td>SUNSET</td><td>HIDDEN</td><td>SUNSET</td></tr>
+  <tr><td>EVENING</td><td>EVENING</td><td>HIDDEN</td><td>moonPhase</td><td>EVENING</td></tr>
+  <tr><td>NIGHT</td><td>NIGHT</td><td>HIDDEN</td><td>moonPhase</td><td>MOONLIGHT</td></tr>
+  <tr><td>MIDNIGHT</td><td>MIDNIGHT</td><td>HIDDEN</td><td>moonPhase</td><td>NIGHT</td></tr>
+</table>
+
+<h3>WeatherState → CloudStyle &amp; WeatherEffectStyle</h3>
+<table>
+  <tr><th>WeatherState</th><th>CloudStyle</th><th>WeatherEffectStyle</th><th>AnimationStyle note</th></tr>
+  <tr><td>CLEAR</td><td>CLEAR</td><td>NONE</td><td>CALM / BREEZY / NORMAL by phase</td></tr>
+  <tr><td>CLOUDY</td><td>SCATTERED</td><td>NONE</td><td>NORMAL</td></tr>
+  <tr><td>RAIN</td><td>OVERCAST</td><td>RAIN</td><td>RAIN</td></tr>
+  <tr><td>SNOW</td><td>OVERCAST</td><td>SNOW</td><td>SNOW</td></tr>
+  <tr><td>FOG</td><td>OVERCAST</td><td>FOG</td><td>BREEZY</td></tr>
+  <tr><td>STORM</td><td>STORM</td><td>STORM</td><td>STORM</td></tr>
+</table>
+
+
+<h2 id="engines">4. Engine Layer</h2>
+
+<h3>SolarCalculator</h3>
+<p>Pure math, no network. Implements the standard sunrise equation using Julian dates.</p>
+<ul>
+  <li>Input: <code>latitude</code>, <code>longitude</code>, <code>date</code></li>
+  <li>Output: <code>SunTimes(sunriseHour: Float, sunsetHour: Float)</code> in decimal hours, or <code>null</code> for polar regions</li>
+  <li>Used by <code>AuraEngine</code> to populate <code>AuraTheme.sunriseHour/sunsetHour</code></li>
+</ul>
+
+<h3>TimePhaseEngine</h3>
+<p>Converts time to a <code>TimePhase</code> enum. Two modes:</p>
+<ul>
+  <li><strong>Fixed schedule</strong> (no GPS): midnight 0–4h, pre-dawn 4–5:30h, sunrise 5:30–6:30h, morning 6:30–11:30h, noon 11:30–13:30h, afternoon 13:30–17:30h, sunset 17:30–18:30h, evening 18:30–21h, night 21–24h</li>
+  <li><strong>Solar schedule</strong> (GPS available): phases derived from minutes-since-sunrise with ±20 min twilight bands around sunrise/sunset</li>
+</ul>
+
+<h3>LightingEngine</h3>
+<p>Continuous sine-curve intensity model:</p>
+<pre>
+phaseOffset = (13/24) × 2π − π/2       // peak at 13:00
+raw = sin((h/24) × 2π − phaseOffset)  // −1..1
+baseIntensity = (raw+1)/2 × 0.85 + 0.15  // 0.15..1.0
+clampedBase = min(0.30, base) if h &lt; 5 or h ≥ 21  // night floor
+intensity = clampedBase × weatherMultiplier
+
+Weather multipliers: CLEAR 1.0 · CLOUDY 0.80 · RAIN 0.65 · FOG 0.60 · SNOW 0.90 · STORM 0.45
+</pre>
+
+<h3>SunEngine</h3>
+<p>Solar arc positioning. Returns normalised <code>SunPosition(x, y, angle)</code>:</p>
+<pre>
+t = (fractionalHour − sunriseHour) / dayLength   [0,1]
+arcAngle = π(1 − t)
+x = 1 − t
+y = 0.82 − sin(arcAngle) × 0.77   // 0.82 horizon → 0.05 zenith at noon
+</pre>
+
+<h3>MoonPhaseCalculator</h3>
+<p>Julian-date synodic cycle. Synodic month = 29.5306 days. Reference new moon: 2000-01-06 18:14 UTC.</p>
+<p><code>phaseFraction()</code> returns 0.0 (new moon) → 0.5 (full moon) → 1.0 (new moon again).</p>
+<p>Illuminated fraction used across StarLayer, MoonLayer, SkyLayer: <code>k = (1 − cos(2π·phase)) / 2</code></p>
+
+<h3>SeasonEngine</h3>
+<p>Calendar-month lookup with hemisphere flip. Northern: Winter=Dec-Feb, Spring=Mar-May, Summer=Jun-Aug, Autumn=Sep-Nov. Southern: opposite.</p>
+
+
+<h2 id="scene">5. Scene Composition &amp; Layer Order</h2>
+
+<pre>
+AuraScene
+└── Box (fillMaxSize)
+    ├── SkyLayer              ← background gradient (bottommost)
+    └── AnimationLayer        ← provides LocalWindIntensity
+        ├── StarLayer         ← night stars (gated by TimePhase)
+        ├── CloudLayer        ← drifting organic clouds
+        ├── SunLayer          ← solar disc + atmospheric bloom
+        ├── MoonLayer         ← lunar disc + phase terminator
+        ├── BirdLayer         ← distant bird silhouettes (daytime clear only)
+        ├── WeatherLayer      ← rain / snow / fog / lightning
+        └── SeasonLayer       ← petals / leaves / pollen / fireflies / frost
+    └── LightLayer            ← subtle ambient tint + storm darkening (topmost)
+</pre>
+
+<h3>AnimationLayer wind model</h3>
+<table>
+  <tr><th>AnimationStyle</th><th>Wind Intensity</th></tr>
+  <tr><td>NONE</td><td>0.00 (or forced 0 when animationsEnabled=false)</td></tr>
+  <tr><td>CALM</td><td>0.10</td></tr>
+  <tr><td>BREEZY</td><td>0.25</td></tr>
+  <tr><td>NORMAL</td><td>0.40</td></tr>
+  <tr><td>WINDY</td><td>0.65</td></tr>
+  <tr><td>RAIN</td><td>0.50</td></tr>
+  <tr><td>SNOW</td><td>0.20</td></tr>
+  <tr><td>STORM</td><td>1.00</td></tr>
+</table>
+<p>Wind uses <code>Animatable&lt;Float&gt;</code> with a 3000 ms tween, so wind changes are smooth.</p>
+
+
+<h2 id="phase-color">6. Phase Color — Atmospheric Color System</h2>
+
+<div class="note">Phase Color replaced the original hard-coded per-phase palette system and artificial LightLayer color filters with a physically inspired multi-layer atmospheric model.</div>
+
+<h3>Core principle</h3>
+<p>The sky color is treated as the result of several orthogonal contributions composited in order:</p>
+<pre>
+BASE TIME-OF-DAY ATMOSPHERE      (SkyLayer — primary source)
+  + WEATHER MODULATION OVERLAY   (SkyLayer — semi-transparent veil)
+  + SUBTLE SCENE HINT            (LightLayer — ≤6% alpha trace only)
+</pre>
+
+<h3>LightLayer — Phase Color changes</h3>
+<p>The original system applied destructive global color filters: 27% indigo at MOONLIGHT, 33% blue at PRE_DAWN, 40% black at NIGHT, 20% orange at SUNSET. These were replaced:</p>
+<table>
+  <tr><th>AmbientLightStyle</th><th>Old alpha</th><th>New alpha</th><th>New color</th></tr>
+  <tr><td>PRE_DAWN</td><td>33%</td><td>4%</td><td>0x0A000020 (trace deep blue)</td></tr>
+  <tr><td>SUNRISE</td><td>13%</td><td>6%</td><td>0x0EFFA040 (trace warm gold)</td></tr>
+  <tr><td>MORNING</td><td>2%</td><td>2%</td><td>0x06B8DDF0 (trace sky-blue)</td></tr>
+  <tr><td>NOON</td><td>3%</td><td>2%</td><td>0x06FFF8E0 (trace warm daylight)</td></tr>
+  <tr><td>AFTERNOON</td><td>7%</td><td>3%</td><td>0x08FFE8A0 (trace golden)</td></tr>
+  <tr><td>SUNSET</td><td>20%</td><td>6%</td><td>0x10E88040 (trace warm orange)</td></tr>
+  <tr><td>EVENING</td><td>20%</td><td>4%</td><td>0x0A203050 (trace cool blue-grey)</td></tr>
+  <tr><td>MOONLIGHT</td><td>27%</td><td><strong>0%</strong></td><td>transparent</td></tr>
+  <tr><td>NIGHT</td><td>40%</td><td><strong>0%</strong></td><td>transparent</td></tr>
+  <tr><td>OVERCAST</td><td>13%</td><td>4%</td><td>0x0AB0BEC5 (trace grey-blue)</td></tr>
+  <tr><td>FOG</td><td>27%</td><td>3%</td><td>0x08D8E4EC (trace pale fog)</td></tr>
+</table>
+<p>Max darkening from LightingEngine: reduced <strong>40% → 22%</strong>. Night sky darkness now comes from SkyLayer gradients, not a black overlay.</p>
+
+<h3>Weather overlay principles</h3>
+<p>The weather overlay is a second semi-transparent gradient on top of the sky. Key rules:</p>
+<ul>
+  <li>RAIN + SUNSET must still look like a rainy sunset — warm horizon survives at 16% suppression vs 24% for midday</li>
+  <li>STORM + SUNSET: warm horizon bleeds through at 22% vs 33% for midday</li>
+  <li>FOG at sunrise/sunset uses warm fog hue <code>#D0C4B0</code>; other times uses cool <code>#BCC8D0</code></li>
+  <li>CLEAR → no overlay drawn at all</li>
+</ul>
+
+<h3>Cloud color integration</h3>
+<table>
+  <tr><th>Phase/Condition</th><th>Lit (top)</th><th>Shadow (underside)</th><th>Rim (edge highlight)</th></tr>
+  <tr><td>STORM</td><td><span class="swatch" style="background:#68727a"></span>#68727A</td><td><span class="swatch" style="background:#262e38"></span>#262E38</td><td><span class="swatch" style="background:#585e68"></span>#585E68</td></tr>
+  <tr><td>OVERCAST</td><td><span class="swatch" style="background:#c8cac8"></span>#C8CAC8</td><td><span class="swatch" style="background:#848890"></span>#848890</td><td>—</td></tr>
+  <tr><td>NIGHT/MIDNIGHT</td><td><span class="swatch" style="background:#606e80"></span>#606E80</td><td><span class="swatch" style="background:#202a38"></span>#202A38</td><td><span class="swatch" style="background:#a4b2c4"></span>#A4B2C4 (moonlit)</td></tr>
+  <tr><td>SUNRISE</td><td><span class="swatch" style="background:#f0e4d0"></span>#F0E4D0</td><td><span class="swatch" style="background:#383858"></span>#383858</td><td><span class="swatch" style="background:#e8c07a"></span>#E8C07A</td></tr>
+  <tr><td>NOON</td><td><span class="swatch" style="background:#f4f5f5"></span>#F4F5F5</td><td>litColor × 0.42/0.44/0.50</td><td><span class="swatch" style="background:#f2f2f0"></span>#F2F2F0</td></tr>
+  <tr><td>SUNSET</td><td><span class="swatch" style="background:#e0d4c8"></span>#E0D4C8</td><td><span class="swatch" style="background:#484858"></span>#484858</td><td><span class="swatch" style="background:#e07030"></span>#E07030</td></tr>
+  <tr><td>EVENING</td><td><span class="swatch" style="background:#bcc4d4"></span>#BCC4D4</td><td><span class="swatch" style="background:#303050"></span>#303050</td><td>—</td></tr>
+</table>
+
+
+<h2 id="phase11">7. Phase 11 — Continuous Atmospheric Color Physics</h2>
+
+<div class="note">Phase 11 replaced the final remaining discrete <code>TimePhase → palette</code> lookup in SkyLayer with a continuously computed solar-elevation-driven atmospheric model. This is the current production implementation.</div>
+
+<h3>Solar elevation normalisation</h3>
+<p>Function <code>solarElevationNorm(currentHour, sunriseHour, sunsetHour)</code> returns <strong>solarElev ∈ [-1, +1]</strong>:</p>
+<pre>
++1.0  =  solar noon         (sun at maximum height)
+ 0.0  =  horizon crossing   (exact sunrise or sunset)
+-1.0  =  solar midnight     (sun at minimum — deepest night)
+</pre>
+<p><strong>GPS-accurate path</strong> (when <code>sunriseHour</code>/<code>sunsetHour</code> available from <code>AuraTheme</code>):</p>
+<pre>
+tDay = (currentHour − sunriseHour) / dayLength          [0..1]
+solarElev = sin(π × tDay)                               [0..+1] daytime
+
+tNight = (currentHour − sunsetHour) / nightLength       [0..1]
+solarElev = −sin(π × tNight)                            [0..-1] nighttime
+</pre>
+<p>Mathematically identical to <code>SunEngine.calculateSolarArc()</code> — no calculation is duplicated. Polled every 30 seconds via <code>LaunchedEffect</code>, matching SunLayer's cadence.</p>
+<p><strong>Fallback</strong> (no GPS): same formula with fixed rise=06:00, set=20:00.</p>
+
+<h3>Seven atmospheric anchor palettes</h3>
+<p>Each palette has 5 stops: zenith / upper sky / mid sky / lower atmosphere / horizon.</p>
+<table>
+  <tr><th>Palette</th><th>solarElev</th><th>Zenith</th><th>Horizon</th><th>Character</th></tr>
+  <tr>
+    <td><code>SKY_DEEP_NIGHT</code></td><td>≤ −1.0</td>
+    <td><span class="swatch" style="background:#010208"></span>#010208</td>
+    <td><span class="swatch" style="background:#0a1230"></span>#0A1230</td>
+    <td>Near-black deep space blue; horizon marginally brighter</td>
+  </tr>
+  <tr>
+    <td><code>SKY_ASTRO_TWILIGHT</code></td><td>≈ −0.40</td>
+    <td><span class="swatch" style="background:#02061a"></span>#02061A</td>
+    <td><span class="swatch" style="background:#142850"></span>#142850</td>
+    <td>Dark navy; subtle horizon separation</td>
+  </tr>
+  <tr>
+    <td><code>SKY_CIVIL_TWILIGHT</code></td><td>≈ −0.12</td>
+    <td><span class="swatch" style="background:#04091e"></span>#04091E</td>
+    <td><span class="swatch" style="background:#281840"></span>#281840</td>
+    <td>Blue hour — cool blue-violet; faint indigo horizon</td>
+  </tr>
+  <tr>
+    <td><code>SKY_HORIZON_CROSS</code></td><td>≈ 0.0</td>
+    <td><span class="swatch" style="background:#10142c"></span>#10142C</td>
+    <td><span class="swatch" style="background:#dc9c50"></span>#DC9C50</td>
+    <td>Cool blue-violet crown + warm orange/gold horizon only</td>
+  </tr>
+  <tr>
+    <td><code>SKY_LOW_ANGLE</code></td><td>≈ +0.20</td>
+    <td><span class="swatch" style="background:#142850"></span>#142850</td>
+    <td><span class="swatch" style="background:#ccd8e0"></span>#CCD8E0</td>
+    <td>Deep natural blue; pale hazy horizon; warmth receded</td>
+  </tr>
+  <tr>
+    <td><code>SKY_FULL_DAY</code></td><td>≈ +0.65</td>
+    <td><span class="swatch" style="background:#0c2b62"></span>#0C2B62</td>
+    <td><span class="swatch" style="background:#b8d6e4"></span>#B8D6E4</td>
+    <td>Classic natural sky — deep blue zenith, pale horizon</td>
+  </tr>
+  <tr>
+    <td><code>SKY_SOLAR_NOON</code></td><td>≈ +1.0</td>
+    <td><span class="swatch" style="background:#0a2858"></span>#0A2858</td>
+    <td><span class="swatch" style="background:#b4d0e0"></span>#B4D0E0</td>
+    <td>Deepest natural blue — maximum Rayleigh scattering</td>
+  </tr>
+</table>
+
+<h3>Interpolation with nonlinear horizon response</h3>
+<p>This is the key physical innovation. In the twilight bands, the five stops use <em>different</em> blend curves:</p>
+<pre>
+tHorizon = tLinear ^ 0.5   // horizon reaches warm target FASTER (√ curve)
+tMid     = tLinear         // mid sky follows linearly
+tUpper   = tLinear ^ 1.6   // zenith/upper sky LAGS behind (power curve)
+</pre>
+<p>Result: at exact sunrise, the zenith is still cool blue-violet while the horizon is already warm golden. The warm region grows upward as the sun rises, and shrinks back down as it sets — continuous, not a palette switch.</p>
+
+<h3>Solar elevation → interpolation mapping</h3>
+<table>
+  <tr><th>solarElev range</th><th>Interpolation</th><th>Visual region</th></tr>
+  <tr><td>≤ −0.80</td><td>DEEP_NIGHT (100%)</td><td>Deep night</td></tr>
+  <tr><td>−0.80 → −0.35</td><td>DEEP_NIGHT → ASTRO_TWILIGHT (linear)</td><td>Night → astro twilight</td></tr>
+  <tr><td>−0.35 → −0.08</td><td>ASTRO_TWILIGHT → CIVIL_TWILIGHT (linear)</td><td>Blue hour approach</td></tr>
+  <tr><td>−0.08 → +0.05</td><td>CIVIL_TWILIGHT → HORIZON_CROSS (nonlinear)</td><td>Pre-dawn / sunrise / sunset</td></tr>
+  <tr><td>+0.05 → +0.25</td><td>HORIZON_CROSS → LOW_ANGLE (nonlinear)</td><td>Golden hour fade-out</td></tr>
+  <tr><td>+0.25 → +0.70</td><td>LOW_ANGLE → FULL_DAY (linear)</td><td>Morning / afternoon</td></tr>
+  <tr><td>+0.70 → +1.00</td><td>FULL_DAY → SOLAR_NOON (linear)</td><td>Late morning / noon</td></tr>
+</table>
+
+<h3>Moonlight atmospheric contribution</h3>
+<p>Applied after base palette computation. Active only when <code>solarElev &lt; −0.05</code>.</p>
+<pre>
+illumination  = (1 − cos(2π·phase)) / 2       // 0=new, 1=full
+nightDepth    = (−solarElev − 0.05) / 0.95    // how deep into night
+maxLift       = 0.05 × illumination × nightDepth
+
+Per-stop lift ratios: [0.15, 0.30, 0.55, 0.80, 1.00]  (zenith → horizon)
+Colour cast:          R×0.75, G×0.80, B×1.00           (cool-silver, not blue)
+</pre>
+<table>
+  <tr><th>Moon phase</th><th>Illumination</th><th>Horizon max lift</th><th>Visible effect</th></tr>
+  <tr><td>New moon</td><td>≈ 0.0</td><td>0</td><td>No change — deepest night</td></tr>
+  <tr><td>Crescent</td><td>≈ 0.10</td><td>+0.005</td><td>Negligible</td></tr>
+  <tr><td>Quarter</td><td>≈ 0.50</td><td>+0.025</td><td>Subtle cool brightening</td></tr>
+  <tr><td>Gibbous</td><td>≈ 0.80</td><td>+0.040</td><td>Noticeable but restrained</td></tr>
+  <tr><td>Full moon</td><td>≈ 1.0</td><td>+0.050</td><td>Cool-silver atmosphere; no visible glow</td></tr>
+</table>
+
+<h3>Seasonal atmospheric modulation</h3>
+<p>Applied after moonlight. Per-channel additive shifts on all 5 stops:</p>
+<table>
+  <tr><th>Season</th><th>R</th><th>G</th><th>B</th><th>Scope</th></tr>
+  <tr><td>WINTER</td><td>−0.018</td><td>−0.010</td><td>+0.008</td><td>All times — slightly cooler</td></tr>
+  <tr><td>SUMMER</td><td>0</td><td>0</td><td>+0.015</td><td>Daytime only — deeper natural blue</td></tr>
+  <tr><td>AUTUMN</td><td>+0.004..+0.012</td><td>+0.002..+0.004</td><td>0</td><td>All times — trace warm lower atmosphere</td></tr>
+  <tr><td>SPRING</td><td>+0.002..+0.008</td><td>0</td><td>0</td><td>All times — barely perceptible warmth</td></tr>
+</table>
+
+
+<h2 id="layers">8. Rendering Layer Reference</h2>
+
+<h3>SkyLayer — Phase 11 (current)</h3>
+<ul>
+  <li>Primary color source for entire scene</li>
+  <li>5-stop vertical gradient: zenith / upper / mid / lower / horizon</li>
+  <li>Solar elevation polled every 30 s; <code>animateColorAsState(tween(3000))</code> on all 9 stops</li>
+  <li>Two Canvas passes: base atmosphere + weather overlay</li>
+  <li>Zero per-frame allocations</li>
+</ul>
+
+<h3>SunLayer</h3>
+<ul>
+  <li>Four-layer atmospheric solar rendering: wide haze → mid scatter bloom → local corona → solar disc</li>
+  <li>Disc radius: <code>size.minDimension × 0.048</code></li>
+  <li>Low-angle horizontal stretch (DAWN/SUNSET) for horizon scatter simulation</li>
+  <li>Solar position: GPS arc (SunEngine) or circle fallback; polled every 30 s</li>
+  <li>No rotating ray spokes — replaced with radial gradient bloom layers</li>
+</ul>
+
+<h3>MoonLayer</h3>
+<ul>
+  <li>Continuous terminator from <code>MoonPhaseCalculator.phaseFraction()</code></li>
+  <li>Shadow = union of half-disc + elliptical cap (correct waxing/waning distinction)</li>
+  <li>Deterministic lunar surface texture (8 mare/highland features, fixed seed)</li>
+  <li>Phase-dependent halo/glow; weather visibility multipliers</li>
+  <li>Position: phase-offset from sun arc (~phase×24h offset)</li>
+  <li>Disc radius: <code>size.minDimension × 0.055</code></li>
+</ul>
+
+<h3>CloudLayer</h3>
+<ul>
+  <li>Six morphologies: CUMULUS, WISPY, LAYERED, FRACTURED, TOWER, SMALL</li>
+  <li>Three depth planes (far/mid/near); clouds per style: STORM=(5,4,3), OVERCAST=(4,3,2), BROKEN=(3,2,2), SCATTERED=(2,2,1), FEW=(1,1,1)</li>
+  <li>Pre-baked unit-scale paths (CachedMassPaths) — zero per-frame Path allocation</li>
+  <li>Sub-masses: primary envelope + 1–4 internal lobes + optional shadow pocket + 0–2 edge wisps</li>
+  <li>Atmospheric perspective: far clouds blend toward neutral grey (atmBlend = depth×0.48)</li>
+  <li>Horizon integration fade prevents hard visible edges</li>
+  <li>Wind modulation: wispy 1.4×, tower 0.7×, by depth plane</li>
+</ul>
+
+<h3>StarLayer</h3>
+<ul>
+  <li>120 stars: 78 faint / 28 medium / 10 bright / 4 very bright (realistic magnitude distribution)</li>
+  <li>Four stellar color temperatures: blue-white 15%, neutral 60%, warm-white 20%, subtle-warm 5%</li>
+  <li>Twinkle: restrained sine-wave alpha modulation per star (±2–10%)</li>
+  <li>Moonlight suppression: faint stars suppressed more strongly than bright</li>
+  <li>Horizon atmospheric extinction + fog fade-start at y=0.38 (vs 0.55 clear)</li>
+  <li>Halos only on Tier 2/3 stars (brightest 14)</li>
+</ul>
+
+<h3>WeatherLayer</h3>
+<h4>Rain</h4>
+<ul>
+  <li>110–165 drops in 3 depth planes (55% back / 35% mid / 10% front)</li>
+  <li>Per-drop atmospheric tint inherited from sky phase (near-neutral, never blue)</li>
+  <li>Streak length varies by depth and speed; horizon fade by depth plane</li>
+  <li>Wind angle affects streak direction; per-drop angle jitter</li>
+</ul>
+<h4>Snow</h4>
+<ul>
+  <li>90 flakes; 4 visual types: tiny point (type 0), 3-arm wispy crystal (type 1), soft diffuse circle (type 2), foreground speck (type 3)</li>
+  <li>Sinusoidal lateral sway per flake (realistic pendulum drift)</li>
+</ul>
+<h4>Fog</h4>
+<ul>
+  <li>10 layers; each layer has 2 overlapping ovals drifting independently</li>
+  <li>Sinusoidal vertical ripple prevents static band appearance</li>
+  <li>Fog color inherits from sky phase (not always white-grey)</li>
+</ul>
+<h4>Lightning</h4>
+<ul>
+  <li>LightningBus drives event timing</li>
+  <li>3 categories: distant (50%), medium (30%), close (20%)</li>
+  <li>1–3 pulses per event with realistic brightness dropoff</li>
+  <li>Full-screen tint capped at 20%; atmospheric bloom in 3 concentric rings</li>
+</ul>
+
+<h3>SeasonLayer</h3>
+<table>
+  <tr><th>Season + condition</th><th>Effect</th><th>Particle count</th></tr>
+  <tr><td>SPRING (not night)</td><td>Cherry/sakura petals — tapered ovals with sinusoidal sway</td><td>28</td></tr>
+  <tr><td>AUTUMN (not night)</td><td>Asymmetric leaf-path particles with tumble rotation</td><td>26</td></tr>
+  <tr><td>SUMMER (daytime, clear)</td><td>Pollen/dandelion seeds — tiny near-invisible dots</td><td>10</td></tr>
+  <tr><td>SUMMER (night)</td><td>Fireflies — realistic bioluminescent bell-curve flash cycle</td><td>20</td></tr>
+  <tr><td>WINTER</td><td>Frost crystals — 2–3 arm ice-crystal forms, subtle</td><td>32</td></tr>
+</table>
+
+<h3>BirdLayer</h3>
+<ul>
+  <li>Active: MORNING/NOON/AFTERNOON + CLEAR/CLOUDY only</li>
+  <li>V-formation flocks (2–3 birds) + solo soaring birds</li>
+  <li>Atmospheric silhouette colors — never pure black; depth-tinted by sky scatter</li>
+  <li>Wing asymmetry, body tilt, sinusoidal bob and air-current drift per bird</li>
+  <li>Season-dependent flock count: AUTUMN=3 flocks, SPRING/SUMMER=2, WINTER=1</li>
+</ul>
+
+<h3>LightLayer</h3>
+<ul>
+  <li>Two Box passes: trace color tint + intensity darkening</li>
+  <li>All tints ≤ 6% alpha; NIGHT and MOONLIGHT are fully transparent</li>
+  <li>Darkening = <code>(1 − lighting.intensity) × 0.22</code>, max 22%</li>
+  <li>Both animated with 4-second tween cross-fade</li>
+</ul>
+
+
+<h2 id="protected">9. Protected Systems</h2>
+<div class="warn">These systems were inspected but not modified. They must remain functionally intact across all future phases.</div>
+<div style="display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 14px">
+  <span class="badge prot">AuraApi</span><span class="badge prot">AuraModule</span><span class="badge prot">AuraManager</span>
+  <span class="badge prot">AuraEngine</span><span class="badge prot">ThemeEngine</span><span class="badge prot">WeatherEngine</span>
+  <span class="badge prot">TimePhaseEngine</span><span class="badge prot">LightingEngine</span><span class="badge prot">SolarCalculator</span>
+  <span class="badge prot">MoonPhaseCalculator</span><span class="badge prot">SunEngine</span><span class="badge prot">SeasonEngine</span>
+  <span class="badge prot">LightningBus</span><span class="badge prot">AnimationLayer</span><span class="badge prot">LocalWindIntensity</span>
+  <span class="badge prot">rememberIsResumed()</span><span class="badge prot">AuraTheme</span><span class="badge prot">ThemeProfile</span>
+  <span class="badge prot">AuraConfig</span><span class="badge prot">All model enums</span>
+</div>
+
+
+<h2 id="build">10. Build Status</h2>
+
+<table>
+  <tr><th>Repository</th><th>Commit</th><th>Status</th></tr>
+  <tr><td><code>khwab-aura</code></td><td><code>93cd70c</code></td><td><span class="badge ok">✓ pushed</span></td></tr>
+  <tr><td><code>khwab-all</code></td><td><code>96d0eba</code></td><td><span class="badge ok">✓ pushed</span></td></tr>
+  <tr><td><code>khwab</code></td><td>no changes</td><td><span class="badge ok">✓ clean</span></td></tr>
+</table>
+
+<pre>
+:aura:assembleDebug      → BUILD SUCCESSFUL (38s)
+:aura:testDebugUnitTest  → BUILD SUCCESSFUL (29s)
+
+Zero compilation errors. Zero new warnings. All existing tests pass.
+</pre>
+
+<h3>Files modified (khwab-aura)</h3>
+<table>
+  <tr><th>File</th><th>Phase</th><th>Change summary</th></tr>
+  <tr><td><code>ui/SkyLayer.kt</code></td><td>Color + P11</td><td>Complete rewrite: continuous solar-elevation model, 7 anchor palettes, nonlinear horizon blending, moonlight + seasonal modulation</td></tr>
+  <tr><td><code>ui/LightLayer.kt</code></td><td>Phase Color</td><td>All tints reduced to ≤6%; NIGHT/MOONLIGHT set to transparent; max darkening 40%→22%</td></tr>
+  <tr><td><code>ui/CloudLayer.kt</code></td><td>Phase Color</td><td>Atmospheric lit/shadow/rim color palette derived from sky lighting model</td></tr>
+  <tr><td><code>ui/MoonLayer.kt</code></td><td>Phase Color</td><td>Night shadow fill updated to match SkyLayer NIGHT zenith (#020914)</td></tr>
+  <tr><td><code>ui/BirdLayer.kt</code></td><td>Pre-existing</td><td>Atmospheric silhouette colors, depth tinting, wing asymmetry, V-formation</td></tr>
+  <tr><td><code>ui/StarLayer.kt</code></td><td>Pre-existing</td><td>Realistic star field: magnitude tiers, stellar colors, moonlight suppression</td></tr>
+  <tr><td><code>ui/SunLayer.kt</code></td><td>Pre-existing</td><td>Four-layer atmospheric solar bloom; no rotating rays; weather visibility</td></tr>
+  <tr><td><code>ui/WeatherLayer.kt</code></td><td>Pre-existing</td><td>Depth-separated rain, snow sway, volumetric fog, atmospheric lightning</td></tr>
+  <tr><td><code>ui/SeasonLayer.kt</code></td><td>Pre-existing</td><td>Petals, leaves, pollen, fireflies, frost — desaturated photographic palettes</td></tr>
+</table>
+
+<div class="footer">Made with IBM Bob</div>
+</body>
+</html>
