@@ -8,7 +8,7 @@ function Get-Repositories {
         @{ Name="khwab";             Path=(Join-Path $Root "khwab") }
         @{ Name="khwab-core";        Path=(Join-Path $Root "khwab-core") }
         @{ Name="khwab-integration"; Path=(Join-Path $Root "khwab-integration") }
-        @{ Name="khwab-aura";        Path=(Join-Path $Root "khwab-aura") }
+        @{ Name="khwab-aura-unity";  Path=(Join-Path $Root "khwab-aura-unity") }
         @{ Name="khwab-all";         Path=$Root }
     )
 }

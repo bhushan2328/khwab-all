@@ -14,7 +14,7 @@ echo "========================================="
 echo "COMMITTING ALL REPOSITORIES"
 echo "========================================="
 
-for repo in khwab khwab-core khwab-integration
+for repo in khwab khwab-core khwab-integration khwab-aura-unity
 do
     echo ""
     echo ">>> $repo"

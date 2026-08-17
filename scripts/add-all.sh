@@ -5,7 +5,7 @@ echo "========================================"
 echo "Adding changes to all repositories"
 echo "========================================"
 
-repos=("khwab" "khwab-core" "khwab-integration")
+repos=("khwab" "khwab-core" "khwab-integration" "khwab-aura-unity")
 
 for repo in "${repos[@]}"; do
     echo ""

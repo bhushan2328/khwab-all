@@ -37,6 +37,7 @@ push_repo() {
 push_repo "khwab"
 push_repo "khwab-core"
 push_repo "khwab-integration"
+push_repo "khwab-aura-unity"
 
 echo
 echo "========================================"

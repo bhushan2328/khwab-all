@@ -3,7 +3,7 @@ set -e
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-REPOS=("khwab" "khwab-core" "khwab-integration")
+REPOS=("khwab" "khwab-core" "khwab-integration" "khwab-aura-unity")
 
 echo "=========================================="
 echo "KHWAB WORKSPACE CHECK"
